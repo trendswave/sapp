@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: qr_cod_db
+      POSTGRES_USER: qr_user
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+     build:
+      context: .
+      dockerfile: Dockerfile
+     command: gunicorn --bind 0.0.0.0:8000 portfolio.wsgi:application
+     volumes:
+      - .:/app
+     ports:
+      - "8000:8000"
+     depends_on:
+      - db
+     environment:
+      DJANGO_SECRET_KEY: 'django-insecure-#5dx6!#n(c-d@3-gpqhk2@ju1-w&qc5bf!8f5e2m9x_h)_y38k'
+      DB_NAME: qr_cod_db
+      DB_USER: qr_user
+      DB_PASSWORD: 1234
+      DB_HOST: db
+      DB_PORT: 5432
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    
+volumes:
+  postgres_data:
