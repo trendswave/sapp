@@ -1,0 +1,35 @@
+{% extends 'sapp/base.html' %}
+
+{% block title %}Account{% endblock %}
+
+{% block content %}
+<h1>Account</h1>
+<p>View your account details here.</p>
+<div id="account-details"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You need to log in first.');
+            window.location.href = "{% url 'login' %}";
+            return;
+        }
+        const response = await fetch('/api/user/account/', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        const result = await response.json();
+        if (response.ok) {
+            document.getElementById('account-details').innerHTML = `
+                <p>Username: ${result.username}</p>
+                <p>Email: ${result.email}</p>
+            `;
+        } else {
+            alert('Failed to fetch account details.');
+        }
+    });
+</script>
+{% endblock %}
